@@ -4,88 +4,104 @@ import './App.css';
 import InputRange from 'react-input-range';
 
 
-const wrapperStyle = { width: 400, border: "1px solid #ccc" , padding: "50px 20px", borderRadius: "5px"};
+const wrapperStyle = { width: 400, border: "1px solid #ccc" , padding: "10px 20px", borderRadius: "5px"};
 
+const initialValue = {
+    min: -1,
+    max: 0
+};
+const maxValue = 69;
+const minValue = -1;
 
 class App extends Component {
-    constructor() {
-        super()
+    constructor(props) {
+        super(props)
 
         this.state = {
             rangers: [],
-            value: { min: -1, max: 0 },
-            value2: { min: 5, max: 50 },
-            indexRange: 0,
-            avalue: [{
-                min: -1,
-                max: 0
-            }],
+            value: { min: -1, max: 0 }
         }
 
-        // this.onChange = this.onChange.bind(this)
         this.addRange = this.addRange.bind(this)
-
+        this.changeValue = this.changeValue.bind(this)
+        this.removeRange = this.removeRange.bind(this)
     }
-
-
-
-    // SaveLight(event) {
-    //     event.preventDefault();
-    //     const data = new FormData(event.target);
-    //     console.log(data);
-    //     fetch('/api/form-submit-url', {
-    //         method: 'POST',
-    //         body: data,
-    //     });
-    // }
-
-
-
-    // onChange (event) {
-    //     this.setState({
-    //         inputValue: event.target.value
-    //     })
-    //     console.log("dsf");
-    // }
 
     addRange (event) {
         event.preventDefault()
 
-        console.log(this.state.avalue)
         this.setState({
             rangers: this.state.rangers.concat([{
-                dom: <InputRange maxValue={69} minValue={-1} value={this.state.avalue[this.state.indexRange]} onChange={value2 => this.setState({ value2 })} />
-            }]),
-
-
+                min: initialValue.min,
+                max: initialValue.max
+            }])
         })
-        this.setState({
-            avalue: this.state.avalue.concat([{
-                min: -1,
-                max: 5
-            }]),
-            indexRange: this.state.indexRange + 1,
-        })
-        // console.log(this.state.indexRange)
     }
 
+    removeRange(index){
+        console.log(index);
+        this.state.rangers.splice(index, 1)
+        this.setState({
+            rangers: this.state.rangers
+        })
+    }
+
+    changeValue (value, index) {
+        // eslint-disable-next-line
+        this.state.rangers[index] = Object.assign(this.state.rangers[index], value);
+        this.setState({
+            rangers: this.state.rangers
+        })
+    }
+
+    componentWillMount(){
+        this.setState({
+            rangers: this.state.rangers.concat(
+                {min: 5, max: 10},
+                {min: 10, max: 20},
+                {min: -1, max: 15},
+                {min: 20, max: 25},
+                {min: 30, max: 55}
+            )
+        });
+    }
     render() {
 
         return (
             <form onSubmit={this.addRange}>
                 <button type="submit">Add range</button>
-                <InputRange maxValue={69} minValue={-1} value={this.state.value} onChange={value => this.setState({ value })} />
-                <InputRange maxValue={69} minValue={-1} value={this.state.value2} onChange={value2 => this.setState({ value2 })}  />
 
-                <ul>
+                <ul style={wrapperStyle}>
+
                     {this.state.rangers.map((range, index) => {
                         return (
-                            <li key={index} style={wrapperStyle}>
-                                {range.dom}
+
+                            <li key={index}>
+
+                                <InputRange
+                                    maxValue={maxValue}
+                                    minValue={minValue}
+                                    value={{min: range.min, max: range.max}}
+                                    onChange={value => this.changeValue(value, index)}
+                                />
+                                <span
+                                    className="delete"
+                                    onClick={() => {this.removeRange(index)}}
+                                >X</span>
+                                <input type="text" readOnly="readOnly" name={"min["+index+"]"} value={range.min}/>
+                                <input type="text" readOnly="readOnly" name={"max["+index+"]"} value={range.max}/>
+                                <div className="wrap_input">
+                                    <label htmlFor={"num_rows_"+index+"_1"}><input id={"num_rows_"+index+"_1"} type="radio" name={"num_rows_"+index} value="0"/> String 1 </label>
+                                    <label htmlFor={"num_rows_"+index+"_2"}><input id={"num_rows_"+index+"_2"} type="radio" name={"num_rows_"+index} value="1"/> String 2 </label>
+                                    <label htmlFor={"num_rows_"+index+"_3"}><input id={"num_rows_"+index+"_3"} type="radio" name={"num_rows_"+index} value="2"/> String 3 </label>
+                                </div>
+
+                                {/*redux db, persist storage*/}
                             </li>
                         )
                     })}
                 </ul>
+                <button type="button">Save</button>
             </form>
         )
     }
